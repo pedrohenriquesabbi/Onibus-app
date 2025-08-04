@@ -1,10 +1,10 @@
 // lib/main.dart
 
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'ui/screens/firebase_options.dart';
 
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Importa a tela de login
+import 'ui/screens/login_screen.dart'; // Importa a tela de login
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

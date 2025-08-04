@@ -1,3 +1,4 @@
+import 'package:engenharia_de_software/ui/widgets/my_drawer.dart';
 import 'package:flutter/material.dart';
 
 // Importa TODAS as telas de destino e o widget do drawer
@@ -5,7 +6,6 @@ import 'definirRota_screen.dart';
 import 'checkIn_screen.dart';
 import 'listaFrequencia_screen.dart'; // Tela da LISTA
 import 'frequenciaDia_screen.dart'; // Tela de SELEÇÃO DE ITINERÁRIO
-import 'widgets/my_drawer.dart';
 
 class HomeScreen extends StatelessWidget {
   final String nomeUsuario;
