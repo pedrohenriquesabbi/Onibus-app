@@ -16,37 +16,45 @@ class MainPage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            Container(
+            SizedBox(
               height: 120,
               child: DrawerHeader(
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundSideBar,
-                  
-                ),
+                decoration: BoxDecoration(color: AppColors.backgroundSideBar),
                 child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.account_circle, size: 40, color: Colors.blue),
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.account_circle,
+                        size: 40,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'João da Silva',
+                            style: TextStyle(
+                              color: AppColors.darkText,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Text(
-                                  'João da Silva',
-                                  style: TextStyle(color: AppColors.darkText, fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'joao@email.com',
-                                  style: TextStyle(color: AppColors.darkText, fontSize: 14),
-                                ),
-                              ],
+                          Text(
+                            'joao@email.com',
+                            style: TextStyle(
+                              color: AppColors.darkText,
+                              fontSize: 14,
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -59,19 +67,14 @@ class MainPage extends StatelessWidget {
               title: Text('Configurações'),
               onTap: () => {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ConfigPage()),
-                  ),
+                  context,
+                  MaterialPageRoute(builder: (_) => const ConfigPage()),
+                ),
               },
             ),
             ListTile(
               leading: Icon(Icons.logout),
-              title: Text(
-                'Sair',
-                style: TextStyle(
-                  color: AppColors.red,
-                )
-              ),
+              title: Text('Sair', style: TextStyle(color: AppColors.red)),
             ),
           ],
         ),
@@ -101,13 +104,8 @@ class MainPage extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Align(
-              alignment: Alignment(0, 0),
-            ),
-            Image.asset(
-              AppImages.busIcon,
-              height: 160,
-            ),
+            Align(alignment: Alignment(0, 0)),
+            Image.asset(AppImages.busIcon, height: 160),
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {},
