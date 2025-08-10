@@ -1,9 +1,5 @@
-// lib/widgets/my_drawer.dart
-
 import 'package:flutter/material.dart';
-// 1. IMPORTE O PACOTE DE AUTENTICAÇÃO
 import 'package:firebase_auth/firebase_auth.dart';
-// Importe as telas para navegação (verifique os caminhos)
 import '../screens/config_page.dart';
 import '../screens/account_info_page.dart';
 
