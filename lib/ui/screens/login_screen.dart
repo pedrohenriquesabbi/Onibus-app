@@ -1,8 +1,8 @@
-// lib/login_screen.dart
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:engenharia_de_software/ui/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'signup_screen.dart';
-// 1. IMPORTE O PACOTE DE AUTENTICAÇÃO DO FIREBASE
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -25,55 +25,72 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // 2. NOVA FUNÇÃO COMPLETA PARA REALIZAR O LOGIN
   Future<void> _loginUsuario() async {
-    if (_emailController.text.isEmpty || _senhaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text('Por favor, preencha email e senha.'),
+  String email = _emailController.text.trim();
+  String senha = _senhaController.text.trim();
+
+  if (email.isEmpty || senha.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preencha todos os campos')),
+    );
+    return;
+  }
+
+  try {
+    // Tenta fazer login no Firebase
+    UserCredential credenciais = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: senha);
+
+    User? usuario = credenciais.user;
+
+    if (usuario != null) {
+      
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userId', usuario.uid);
+
+      // Tenta pegar o nome do perfil
+    String nomeUsuario = usuario?.displayName ?? "Usuário";
+
+    // Se você guarda o nome no Firestore, tem que buscar lá:
+    if (nomeUsuario == "Usuário") {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(usuario!.uid)
+          .get();
+      nomeUsuario = snapshot['nome'];
+    }
+
+      // Redireciona para tela inicial
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(nomeUsuario: nomeUsuario),
         ),
       );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Tenta fazer o login com o Firebase
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _senhaController.text.trim(),
+    } else {
+      // Se não tiver usuário válido
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Falha no login. Tente novamente.')),
       );
-      // Se o login for bem-sucedido, não precisamos navegar daqui.
-      // O "Guardião" que vamos criar no main.dart fará isso automaticamente.
-    } on FirebaseAuthException catch (e) {
-      // Trata erros comuns de login
-      String mensagemErro = "Ocorreu um erro ao fazer login.";
-      if (e.code == 'user-not-found' ||
-          e.code == 'wrong-password' ||
-          e.code == 'invalid-credential') {
-        mensagemErro = 'Email ou senha incorretos. Tente novamente.';
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: Text(mensagemErro),
-          ),
-        );
-      }
-    } finally {
-      // Garante que o indicador de carregamento seja desativado no final
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
+  } on FirebaseAuthException catch (e) {
+    String mensagemErro;
+
+    if (e.code == 'user-not-found') {
+      mensagemErro = 'Usuário não encontrado.';
+    } else if (e.code == 'wrong-password') {
+      mensagemErro = 'Senha incorreta.';
+    } else {
+      mensagemErro = 'Erro: ${e.message}';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagemErro)),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +187,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                // 3. O BOTÃO AGORA CHAMA A FUNÇÃO DE LOGIN
                 onPressed: _isLoading ? null : _loginUsuario,
                 child: _isLoading
                     ? const CircularProgressIndicator(

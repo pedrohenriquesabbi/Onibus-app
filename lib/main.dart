@@ -54,24 +54,25 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // O "GUARDIÃO" DE AUTENTICAÇÃO
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // Enquanto verifica o status, mostra uma tela de carregamento
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          // Se o snapshot tem dados, significa que o usuário ESTÁ logado
-          if (snapshot.hasData) {
-            // Se está logado, busca os dados do usuário no Firestore para personalizar a HomeScreen
-            return UserDataFetcher(userId: snapshot.data!.uid);
-          }
-          // Se não tem dados, o usuário NÃO está logado, mostra a StartPage (que leva para o login/cadastro)
-          return const StartPage();
-        },
-      ),
+      home: StartPage(),
+      // StreamBuilder<User?>(
+      //   stream: FirebaseAuth.instance.authStateChanges(),
+      //   builder: (context, snapshot) {
+      //     // Enquanto verifica o status, mostra uma tela de carregamento
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       return const Scaffold(
+      //         body: Center(child: CircularProgressIndicator()),
+      //       );
+      //     }
+      //     // Se o snapshot tem dados, significa que o usuário ESTÁ logado
+      //     if (snapshot.hasData) {
+      //       // Se está logado, busca os dados do usuário no Firestore para personalizar a HomeScreen
+      //       return UserDataFetcher(userId: snapshot.data!.uid);
+      //     }
+      //     // Se não tem dados, o usuário NÃO está logado, mostra a StartPage (que leva para o login/cadastro)
+      //     return const StartPage();
+      //   },
+      // ),
     );
   }
 }
