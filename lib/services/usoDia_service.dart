@@ -19,10 +19,7 @@ class UsoDiaService {
         .collection('alunos')
         .doc(alunoId);
 
-    await docRef.set({
-      'uso': tipo.name,
-      'data': dia.toIso8601String(),
-    });
+    await docRef.set({'uso': tipo.name, 'data': dia.toIso8601String()});
   }
 
   Future<String?> obterUsoDoDia({
@@ -39,10 +36,9 @@ class UsoDiaService {
     final doc = await docRef.get();
 
     final data = doc.data();
-    if (doc.exists && data != null && data is Map<String, dynamic>) {
+    if (doc.exists && data != null) {
       return data['uso'] as String?;
     }
     return null;
   }
 }
-

@@ -22,7 +22,7 @@ class Landing_Page extends StatelessWidget {
               SizedBox(
                 width: 300, // Define largura do texto
                 child: Text(
-                  'Bem-vindo ao aplicativo BusOne! Crie uma conta ou, caso já tenha, faça login!',
+                  'Bem-vindo ao nosso aplicativo! \n Crie uma conta ou, caso já tenha, faça login!',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -49,10 +49,7 @@ class Landing_Page extends StatelessWidget {
                 },
                 child: Text(
                   'Login',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
                 ),
               ),
               SizedBox(height: 16),
@@ -73,11 +70,8 @@ class Landing_Page extends StatelessWidget {
                 },
                 child: Text(
                   "Cadastro",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                  )
-                )
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+                ),
               ),
             ],
           ),

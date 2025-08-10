@@ -56,8 +56,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyDTG51nlgMhzZa4lb-HiLjT6Os4Z9SQ3K8',
     appId: '1:60189150902:android:e075c545ee01b2a8922017',
     messagingSenderId: '60189150902',
-    projectId: 'onibus-project',
+    projectId: 'apponibus-1d8f1',
     storageBucket: 'onibus-project.firebasestorage.app',
   );
-
 }

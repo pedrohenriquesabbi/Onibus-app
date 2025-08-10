@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:engenharia_de_software/services/salvarRotaLocal_service.dart';
-import 'mocks.mocks.dart';
 
 void main() {
   group('SalvarRotaLocalService', () {

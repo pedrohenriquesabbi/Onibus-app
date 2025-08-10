@@ -1,8 +1,9 @@
 // lib/signup_screen.dart
 
 import 'package:flutter/material.dart';
-// 1. Importa o pacote da máscara
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,10 +17,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
-  // 2. Adiciona o controller para o CPF
   final _cpfController = TextEditingController();
 
-  // 3. Cria a máscara para o CPF
   final maskFormatter = MaskTextInputFormatter(
     mask: '###.###.###-##',
     filter: {"#": RegExp(r'[0-9]')},
@@ -27,6 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _senhaVisivel = false;
   bool _confirmarSenhaVisivel = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,9 +34,109 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
-    // 4. Limpa o controller do CPF também
     _cpfController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cadastrarUsuario() async {
+    print("✅ PASSO 1: Função _cadastrarUsuario iniciada.");
+
+    if (_senhaController.text != _confirmarSenhaController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('As senhas não coincidem!'),
+        ),
+      );
+      return;
+    }
+    if (_nomeController.text.isEmpty ||
+        _cpfController.text.isEmpty ||
+        _emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('Por favor, preencha todos os campos.'),
+        ),
+      );
+      return;
+    }
+
+    print("✅ PASSO 2: Validações de campos passaram.");
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      print("⏳ PASSO 3: Tentando criar usuário no Firebase Authentication...");
+      print("   - Email: ${_emailController.text.trim()}");
+
+      // PONTO CRÍTICO 1: Criação do usuário no Auth
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _senhaController.text.trim(),
+          );
+
+      print("✅ PASSO 4: Usuário criado no Auth com sucesso!");
+      print("   - UID do usuário: ${userCredential.user!.uid}");
+
+      print("⏳ PASSO 5: Tentando salvar dados adicionais no Firestore...");
+
+      // PONTO CRÍTICO 2: Escrita no banco de dados
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(userCredential.user!.uid)
+          .set({
+            'nome': _nomeController.text.trim(),
+            'cpf': _cpfController.text.trim(),
+            'email': _emailController.text.trim(),
+            'uid': userCredential.user!.uid,
+            'createdAt': Timestamp.now(),
+          });
+
+      print("✅ PASSO 6: Dados salvos no Firestore com sucesso!");
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Conta criada com sucesso! Faça o login.'),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } on FirebaseAuthException catch (e) {
+      print("❌ ERRO CAPTURADO! O processo parou aqui.");
+      print("   - CÓDIGO DO ERRO: ${e.code}");
+      print("   - MENSAGEM COMPLETA: ${e.message}");
+      print("   - ERRO DETALHADO DO FIREBASE: ${e.toString()}");
+
+      String mensagemErro = "Ocorreu um erro ao criar a conta.";
+      if (e.code == 'weak-password') {
+        mensagemErro = 'A senha fornecida é muito fraca (mínimo 6 caracteres).';
+      } else if (e.code == 'email-already-in-use') {
+        mensagemErro = 'Este email já está em uso por outra conta.';
+      } else if (e.code == 'invalid-email') {
+        mensagemErro = 'O email fornecido é inválido.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(mensagemErro),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -84,8 +184,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // ================= NOVO CAMPO DE CPF =================
               TextFormField(
                 controller: _cpfController,
                 style: const TextStyle(color: Colors.white),
@@ -94,11 +192,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   prefixIcon: Icon(Icons.badge_outlined, color: Colors.white70),
                 ),
                 keyboardType: TextInputType.number,
-                // Aplica a máscara de formatação
                 inputFormatters: [maskFormatter],
               ),
-
-              // ======================================================
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
@@ -158,22 +253,18 @@ class _SignupScreenState extends State<SignupScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
-                  if (_senhaController.text == _confirmarSenhaController.text) {
-                    print('Cadastro Pressionado!');
-                    print('Nome: ${_nomeController.text}');
-                    // 5. Imprime o CPF para verificar se está funcionando
-                    print('CPF: ${_cpfController.text}');
-                    print('Email: ${_emailController.text}');
-                    print('Senha: ${_senhaController.text}');
-                  } else {
-                    print('As senhas não coincidem!');
-                  }
-                },
-                child: const Text(
-                  'Cadastrar',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                onPressed: _isLoading ? null : _cadastrarUsuario,
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      )
+                    : const Text(
+                        'Cadastrar',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ],
           ),
