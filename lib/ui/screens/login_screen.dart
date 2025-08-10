@@ -1,8 +1,9 @@
 // lib/login_screen.dart
 
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Importa a tela de home para a navegação
 import 'signup_screen.dart';
+// 1. IMPORTE O PACOTE DE AUTENTICAÇÃO DO FIREBASE
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   bool _senhaVisivel = false;
+  bool _isLoading = false; // Para controlar o indicador de carregamento
 
   @override
   void dispose() {
@@ -23,9 +25,58 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // 2. NOVA FUNÇÃO COMPLETA PARA REALIZAR O LOGIN
+  Future<void> _loginUsuario() async {
+    if (_emailController.text.isEmpty || _senhaController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('Por favor, preencha email e senha.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Tenta fazer o login com o Firebase
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _senhaController.text.trim(),
+      );
+      // Se o login for bem-sucedido, não precisamos navegar daqui.
+      // O "Guardião" que vamos criar no main.dart fará isso automaticamente.
+    } on FirebaseAuthException catch (e) {
+      // Trata erros comuns de login
+      String mensagemErro = "Ocorreu um erro ao fazer login.";
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
+        mensagemErro = 'Email ou senha incorretos. Tente novamente.';
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(mensagemErro),
+          ),
+        );
+      }
+    } finally {
+      // Garante que o indicador de carregamento seja desativado no final
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Estilo para os campos de texto
     const inputDecorationTheme = InputDecoration(
       filled: true,
       fillColor: Color(0xFF303030),
@@ -49,7 +100,6 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
       ),
-      // 1. Fundo escuro aplicado
       backgroundColor: const Color(0xFF424242),
       body: Center(
         child: SingleChildScrollView(
@@ -58,14 +108,12 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 2. Ícone com a nova cor
               Icon(
                 Icons.directions_bus_filled_rounded,
                 size: 80,
                 color: Colors.white70,
               ),
               const SizedBox(height: 16),
-              // 3. Textos com a nova cor
               const Text(
                 'Bem-vindo de volta!',
                 textAlign: TextAlign.center,
@@ -82,13 +130,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 16, color: Colors.grey[400]),
               ),
               const SizedBox(height: 40),
-
-              // 4. Campos de texto com o novo estilo
               TextFormField(
                 controller: _emailController,
-                style: const TextStyle(
-                  color: Colors.white,
-                ), // Cor do texto digitado
+                style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.emailAddress,
                 decoration: inputDecorationTheme.copyWith(
                   labelText: 'Email',
@@ -98,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _senhaController,
-                style: const TextStyle(
-                  color: Colors.white,
-                ), // Cor do texto digitado
+                style: const TextStyle(color: Colors.white),
                 obscureText: !_senhaVisivel,
                 decoration: inputDecorationTheme.copyWith(
                   labelText: 'Senha',
@@ -119,38 +161,32 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
-              // 5. Botão primário com o novo estilo
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.grey[300], // Cor clara para destaque
-                  foregroundColor: Colors.black, // Texto escuro para contraste
+                  backgroundColor: Colors.grey[300],
+                  foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
-                  const nomeDoUsuarioLogado = "Maria";
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          HomeScreen(nomeUsuario: nomeDoUsuarioLogado),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Entrar',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                // 3. O BOTÃO AGORA CHAMA A FUNÇÃO DE LOGIN
+                onPressed: _isLoading ? null : _loginUsuario,
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      )
+                    : const Text(
+                        'Entrar',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               const SizedBox(height: 12),
-
-              // 6. Botão secundário com o novo estilo
               TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white, // Cor do texto
-                ),
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
                 onPressed: () {
                   Navigator.push(
                     context,

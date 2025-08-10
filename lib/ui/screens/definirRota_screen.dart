@@ -1,6 +1,9 @@
 // lib/definirRota_screen.dart
 
 import 'package:flutter/material.dart';
+// 1. IMPORTE OS PACOTES DO FIREBASE
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DefinirRotaScreen extends StatefulWidget {
   const DefinirRotaScreen({super.key});
@@ -13,6 +16,7 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
   String? _cidadeSelecionada;
   String? _universidadeSelecionada;
   String? _motoristaSelecionado;
+  bool _isLoading = false; // Para o indicador de progresso
 
   final List<String> _opcoesCidade = [
     'Viçosa do Ceará',
@@ -36,7 +40,69 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
     'Sr. Sérgio',
   ];
 
-  // Função para o pop-up de SUCESSO
+  // 2. NOVA FUNÇÃO PARA SALVAR A ROTA NO FIRESTORE
+  Future<void> _salvarRota() async {
+    // Valida se todas as opções foram selecionadas
+    if (_cidadeSelecionada == null ||
+        _universidadeSelecionada == null ||
+        _motoristaSelecionado == null) {
+      _mostrarDialogoDeErro();
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Pega o utilizador atualmente logado
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Salva ou atualiza os dados no Firestore
+        // Usamos .set() porque ele cria o documento se não existir ou atualiza se já existir.
+        await FirebaseFirestore.instance
+            .collection('rotas_usuarios') // Coleção para armazenar as rotas
+            .doc(
+              user.uid,
+            ) // O documento é identificado pelo ID único do utilizador
+            .set({
+              'cidade': _cidadeSelecionada,
+              'universidade': _universidadeSelecionada,
+              'motorista': _motoristaSelecionado,
+              'lastUpdated':
+                  Timestamp.now(), // Guarda a data da última atualização
+            });
+
+        if (mounted) _mostrarDialogoDeSucesso();
+      } else {
+        // Este erro acontecerá se o login não estiver a funcionar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(
+              'Erro: Utilizador não encontrado. Faça login novamente.',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Mostra um erro genérico se a comunicação com o Firestore falhar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text('Erro ao salvar a rota: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   void _mostrarDialogoDeSucesso() {
     showDialog(
       context: context,
@@ -55,7 +121,6 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
     );
   }
 
-  // NOVA FUNÇÃO: Pop-up para ERRO de validação
   void _mostrarDialogoDeErro() {
     showDialog(
       context: context,
@@ -78,7 +143,6 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Estilo do texto para os rótulos dos campos
     const labelStyle = TextStyle(color: Colors.white, fontSize: 16);
 
     return Scaffold(
@@ -96,9 +160,8 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
             const Icon(Icons.directions_bus, size: 100, color: Colors.white70),
             const SizedBox(height: 32),
 
-            // --- Campo Cidade ---
             const Text('Cidade onde moro:', style: labelStyle),
-            const SizedBox(height: 8), // Espaço adicionado
+            const SizedBox(height: 8),
             _buildDropdown(
               value: _cidadeSelecionada,
               hint: 'Selecione sua cidade',
@@ -107,9 +170,8 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
             ),
             const SizedBox(height: 24),
 
-            // --- Campo Universidade ---
             const Text('Universidade em que estudo:', style: labelStyle),
-            const SizedBox(height: 8), // Espaço adicionado
+            const SizedBox(height: 8),
             _buildDropdown(
               value: _universidadeSelecionada,
               hint: 'Selecione sua universidade',
@@ -119,9 +181,8 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
             ),
             const SizedBox(height: 24),
 
-            // --- Campo Motorista ---
             const Text('Motorista do meu ônibus:', style: labelStyle),
-            const SizedBox(height: 8), // Espaço adicionado
+            const SizedBox(height: 8),
             _buildDropdown(
               value: _motoristaSelecionado,
               hint: 'Selecione seu motorista',
@@ -130,30 +191,25 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
             ),
             const SizedBox(height: 40),
 
-            // --- Botão Salvar com a NOVA LÓGICA ---
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Colors.grey[300],
                 foregroundColor: Colors.black,
               ),
-              onPressed: () {
-                // VERIFICA SE TODOS OS CAMPOS FORAM PREENCHIDOS
-                if (_cidadeSelecionada != null &&
-                    _universidadeSelecionada != null &&
-                    _motoristaSelecionado != null) {
-                  // Se tudo estiver OK, mostra o diálogo de sucesso
-                  print('Salvando dados...');
-                  _mostrarDialogoDeSucesso();
-                } else {
-                  // Se algo faltar, mostra o diálogo de erro
-                  _mostrarDialogoDeErro();
-                }
-              },
-              child: const Text(
-                'SALVAR',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              // 3. O BOTÃO AGORA CHAMA A FUNÇÃO DE SALVAR
+              onPressed: _isLoading ? null : _salvarRota,
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    )
+                  : const Text(
+                      'SALVAR',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         ),
@@ -161,7 +217,6 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
     );
   }
 
-  // Widget auxiliar para construir os Dropdowns e evitar repetição de código
   Widget _buildDropdown({
     required String? value,
     required String hint,
@@ -171,18 +226,17 @@ class _DefinirRotaScreenState extends State<DefinirRotaScreen> {
     return DropdownButtonFormField<String>(
       value: value,
       hint: Text(hint, style: TextStyle(color: Colors.grey[400])),
-      dropdownColor: const Color(0xFF424242), // Cor do menu que abre
+      dropdownColor: const Color(0xFF424242),
       iconEnabledColor: Colors.white70,
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         filled: true,
-        fillColor: const Color(0xFF303030), // Fundo escuro para o campo
+        fillColor: const Color(0xFF303030),
       ),
       onChanged: onChanged,
       items: items.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
-          // Estilo para o texto das opções
           child: Text(value, style: const TextStyle(color: Colors.white)),
         );
       }).toList(),
