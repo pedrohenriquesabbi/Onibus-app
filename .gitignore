@@ -44,3 +44,41 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# =================================================
+# ADIÇÕES RECOMENDADAS ABAIXO
+# =================================================
+
+# Arquivos de dependências e cobertura de testes
+# Ignorar o pubspec.lock permite que cada desenvolvedor obtenha as versões
+# compatíveis mais recentes ao executar `flutter pub get`.
+pubspec.lock
+coverage/
+
+# Arquivos sensíveis e de configuração do Firebase
+# Estes ficheiros são gerados automaticamente ou contêm chaves.
+# NUNCA devem ser enviados para o repositório.
+/lib/firebase_options.dart
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
+# Ficheiros de configuração local do Android
+/android/key.properties
+/android/local.properties
+/android/.gradle/
+/android/gradle/
+/android/gradlew
+/android/gradlew.bat
+
+# Ficheiros de configuração local do iOS
+/ios/Pods/
+/ios/Podfile.lock
+/ios/.symlinks/
+/ios/Runner.xcworkspace/
+/ios/Runner.xcodeproj/project.xcworkspace/
+/ios/Runner.xcodeproj/xcshareddata/
+/ios/Flutter/ephemeral/
+
+# Ficheiros temporários de desenvolvimento
+# Adicione aqui o seu script de povoamento para não o enviar para o repositório.
+lib/ui/screens/dev_utils_page.dart
+
