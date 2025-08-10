@@ -4,16 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -53,10 +43,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDTG51nlgMhzZa4lb-HiLjT6Os4Z9SQ3K8',
-    appId: '1:60189150902:android:e075c545ee01b2a8922017',
-    messagingSenderId: '60189150902',
+    apiKey: 'AIzaSyCmiCr9rXoY4t02qzfmGmlHMdbjkuOb6Hs',
+    appId: '1:807802576944:android:f4cf79a74354d00b990df5',
+    messagingSenderId: '807802576944',
     projectId: 'apponibus-1d8f1',
-    storageBucket: 'onibus-project.firebasestorage.app',
+    storageBucket: 'apponibus-1d8f1.firebasestorage.app',
   );
 }

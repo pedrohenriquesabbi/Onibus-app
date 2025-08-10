@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "60189150902",
-    "project_id": "onibus-project",
-    "storage_bucket": "onibus-project.firebasestorage.app"
+    "project_number": "807802576944",
+    "project_id": "apponibus-1d8f1",
+    "storage_bucket": "apponibus-1d8f1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:60189150902:android:e075c545ee01b2a8922017",
+        "mobilesdk_app_id": "1:807802576944:android:f4cf79a74354d00b990df5",
         "android_client_info": {
           "package_name": "com.example.engenharia_de_software"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDTG51nlgMhzZa4lb-HiLjT6Os4Z9SQ3K8"
+          "current_key": "AIzaSyCmiCr9rXoY4t02qzfmGmlHMdbjkuOb6Hs"
         }
       ],
       "services": {
