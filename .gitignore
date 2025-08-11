@@ -92,3 +92,8 @@ coverage/
 # Adicione aqui o seu script de povoamento para não o enviar para o repositório.
 lib/ui/screens/dev_utils_page.dart
 
+firebase.json
+analysus_options.yaml
+devtool_options.yaml
+.metadata
+
