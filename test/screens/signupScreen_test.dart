@@ -3,29 +3,92 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:engenharia_de_software/ui/screens/signup_screen.dart';
 
 void main() {
-  testWidgets('SignupScreen exibe todos os campos e reage ao botão',
-      (WidgetTester tester) async {
+  testWidgets('SignupScreen - renderiza corretamente os campos e textos', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SignupScreen(),
-      ),
+      const MaterialApp(home: SignupScreen()),
     );
 
-    // Verifica título e instrução
+    // Título da AppBar
     expect(find.text('Criar Conta'), findsOneWidget);
+
+    // Texto de instrução
     expect(find.text('Preencha os dados para se cadastrar'), findsOneWidget);
 
-    // Verifica campos de texto
+    // Campos de texto
     expect(find.widgetWithText(TextFormField, 'Nome Completo'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'CPF'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Senha'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Confirmar Senha'), findsOneWidget);
 
-    // Preenche os campos
-    await tester.enterText(find.widgetWithText(TextFormField, 'Nome Completo'), 'João da Silva');
-    await tester.enterText(find.widgetWithText(TextFormField, 'CPF'), '12345678900'); // máscara será aplicada
-    await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'joao@email.com');
+    // Botão Cadastrar
+    expect(find.widgetWithText(ElevatedButton, 'Cadastrar'), findsOneWidget);
+  });
+
+  testWidgets('SignupScreen - alterna visibilidade dos campos de senha', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SignupScreen()),
+    );
+
+    // Ícone inicial da senha = visibility_off
+    expect(find.byIcon(Icons.visibility_off), findsNWidgets(2)); // dois campos senha
+
+    // Clicar no ícone do campo "Senha"
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.visibility_off).first);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.visibility), findsOneWidget);
+
+    // Clicar no ícone do campo "Confirmar Senha"
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.visibility_off).last);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.visibility), findsNWidgets(2));
+  });
+
+  testWidgets('SignupScreen - mostra snackbar erro se senhas diferentes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SignupScreen()),
+    );
+
+    // Preenche campos de senha diferentes
+    await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), '123456');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmar Senha'), '654321');
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Cadastrar'));
+    await tester.pump(); // para mostrar snackbar
+
+    // Snackbar deve aparecer com texto de erro de senha
+    expect(find.text('As senhas não coincidem!'), findsOneWidget);
+  });
+
+  testWidgets('SignupScreen - mostra snackbar erro se campos obrigatórios vazios', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SignupScreen()),
+    );
+
+    // Senhas iguais para passar validação anterior
+    await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), '123456');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmar Senha'), '123456');
+
+    // Não preenche nome, cpf ou email (vazio)
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Cadastrar'));
+    await tester.pump(); // para mostrar snackbar
+
+    // Snackbar deve aparecer com texto de erro sobre campos vazios
+    expect(find.text('Por favor, preencha todos os campos.'), findsOneWidget);
+  });
+
+  testWidgets('SignupScreen - aceita clique no botão Cadastrar com dados válidos', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SignupScreen()),
+    );
+
+    // Preenche todos os campos corretamente
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nome Completo'), 'Maria Silva');
+    await tester.enterText(find.widgetWithText(TextFormField, 'CPF'), '123.456.789-00');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'maria@email.com');
     await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), '123456');
     await tester.enterText(find.widgetWithText(TextFormField, 'Confirmar Senha'), '123456');
 
@@ -33,28 +96,7 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Cadastrar'));
     await tester.pump();
 
-    // Como a ação do botão atualmente só printa, não há mudança visível
-    // Podemos apenas garantir que o botão está lá e não causou erro
-    expect(find.widgetWithText(ElevatedButton, 'Cadastrar'), findsOneWidget);
-  });
-
-  testWidgets('Exibe mensagem se senhas não coincidem', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: SignupScreen(),
-      ),
-    );
-
-    await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), '123456');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Confirmar Senha'), '654321');
-
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Cadastrar'));
-    await tester.pump();
-
-    // Atualmente, o código só printa "As senhas não coincidem!", que não aparece na UI.
-    // Para testar isso melhor, teria que alterar a UI para exibir feedback visível.
-    // Por enquanto, só garantimos que o botão existe e o teste roda sem erro.
-
+    // Apenas verificamos que o botão está lá e a ação não causa erro no widget
     expect(find.widgetWithText(ElevatedButton, 'Cadastrar'), findsOneWidget);
   });
 }

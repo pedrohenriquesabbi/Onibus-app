@@ -61,7 +61,10 @@ coverage/
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
 
-# Ficheiros de configuração local do Android
+# Ficheiros de configuração local do
+.vscode/
+android/
+coverage/
 /android/key.properties
 /android/local.properties
 /android/.gradle/
