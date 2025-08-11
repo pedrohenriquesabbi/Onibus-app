@@ -93,7 +93,7 @@ coverage/
 lib/ui/screens/dev_utils_page.dart
 
 firebase.json
-analysus_options.yaml
-devtool_options.yaml
+analysis_options.yaml
+devtools_options.yaml
 .metadata
 
