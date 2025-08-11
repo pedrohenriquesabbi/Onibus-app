@@ -62,8 +62,8 @@ coverage/
 /ios/Runner/GoogleService-Info.plist
 
 # Ficheiros de configuração local do
-.vscode/
-android/
+/.vscode/
+/android/
 coverage/
 /android/key.properties
 /android/local.properties
