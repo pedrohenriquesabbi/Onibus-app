@@ -31,7 +31,14 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+/build/*
+!build/app
+/build/app/*
+!build/app/outputs/
+build/app/outputs/*
+!build/app/outputs/flutter-apk/
+build/app/outputs/flutter-apk/*
+!build/app/outputs/flutter-apk/app-release.apk
 
 # Symbolication related
 app.*.symbols
@@ -62,8 +69,8 @@ coverage/
 /ios/Runner/GoogleService-Info.plist
 
 # Ficheiros de configuração local do
-/.vscode/
-/android/
+.vscode/
+android/
 coverage/
 /android/key.properties
 /android/local.properties
