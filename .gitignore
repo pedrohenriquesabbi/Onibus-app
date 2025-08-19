@@ -39,7 +39,7 @@ migrate_working_dir/
 # !build/app/outputs/flutter-apk/
 # build/app/outputs/flutter-apk/*
 # !build/app/outputs/flutter-apk/app-release.apk
-/build/
+/build
 
 # Symbolication related
 app.*.symbols
@@ -79,6 +79,8 @@ coverage/
 /android/gradle/
 /android/gradlew
 /android/gradlew.bat
+
+package-lock.json
 
 # Ficheiros de configuração local do iOS
 /ios/Pods/
